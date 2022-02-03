@@ -1,6 +1,7 @@
+import 'dart:io';
 import 'dart:isolate';
 import 'dart:math' as math;
-
+import 'package:path/path.dart';
 import 'package:io/ansi.dart' as ansi;
 import 'package:quiver/iterables.dart';
 import 'package:stack_trace/stack_trace.dart';
@@ -8,12 +9,17 @@ import 'package:stack_trace/stack_trace.dart';
 final _coreLibraryStyle = ansi.darkGray;
 
 class StackTraceFormatter {
-  StackTraceFormatter._(this._pkgNameToFileMap);
+  StackTraceFormatter._(
+    this._pkgNameToFileMap, {
+    required this.useRelativePathsIfShorter,
+  });
 
   final Map<String, Uri> _pkgNameToFileMap;
+  final bool useRelativePathsIfShorter;
 
   static Future<StackTraceFormatter> create({
     Iterable<String> packageNamesToResolve = const [],
+    bool useRelativePathsIfShorter = true,
   }) async {
     final entries = await Future.wait(
       packageNamesToResolve.map((pkgName) async {
@@ -29,7 +35,10 @@ class StackTraceFormatter {
       }),
       eagerError: true,
     );
-    return StackTraceFormatter._(Map.fromEntries(entries));
+    return StackTraceFormatter._(
+      Map.fromEntries(entries),
+      useRelativePathsIfShorter: useRelativePathsIfShorter,
+    );
   }
 
   String format(StackTrace st) {
@@ -63,7 +72,11 @@ class StackTraceFormatter {
         final pkgLibRootPath = _pkgNameToFileMap[f.package]!.path;
         final relativeFilePath =
             f.library.substring(f.library.indexOf('/') + 1);
-        return '$pkgLibRootPath$relativeFilePath:${f.line}:${f.column}';
+
+        final absFilePath = '$pkgLibRootPath$relativeFilePath';
+        final filePath = useRelativePathsIfShorter ? _findShortestPath(absFilePath) : absFilePath;
+
+        return '$filePath:${f.line}:${f.column}';
       } else {
         return '${f.library}:${f.line}:${f.column}';
       }
@@ -72,5 +85,10 @@ class StackTraceFormatter {
 
   bool _shouldMapPackage(String? pkg) {
     return pkg != null && _pkgNameToFileMap.containsKey(pkg);
+  }
+
+  String _findShortestPath(String absPath) {
+    final relPath = relative(absPath, from: Directory.current.path);
+    return relPath.length < absPath.length ? relPath : absPath;
   }
 }
