@@ -1,6 +1,6 @@
 name: stack_attack
 description: Prettify your stack traces in Dart command line interfaces
-version: 0.0.0-pre.0
+version: 0.0.0-pre.1
 repository: https://github.com/shyndman/stack_attack
 
 environment:
