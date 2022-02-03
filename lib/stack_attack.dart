@@ -7,19 +7,23 @@ import 'package:quiver/iterables.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 final _coreLibraryStyle = ansi.darkGray;
+const _numColumnWidth = 8;
 
 class StackTraceFormatter {
   StackTraceFormatter._(
     this._pkgNameToFileMap, {
     required this.useRelativePathsIfShorter,
+    required this.includeFrameNumbers,
   });
 
   final Map<String, Uri> _pkgNameToFileMap;
   final bool useRelativePathsIfShorter;
+  final bool includeFrameNumbers;
 
   static Future<StackTraceFormatter> create({
     Iterable<String> packageNamesToResolve = const [],
     bool useRelativePathsIfShorter = true,
+    bool includeFrameNumbers = false,
   }) async {
     final entries = await Future.wait(
       packageNamesToResolve.map((pkgName) async {
@@ -38,6 +42,7 @@ class StackTraceFormatter {
     return StackTraceFormatter._(
       Map.fromEntries(entries),
       useRelativePathsIfShorter: useRelativePathsIfShorter,
+      includeFrameNumbers: includeFrameNumbers,
     );
   }
 
@@ -60,9 +65,11 @@ class StackTraceFormatter {
 
       if (frame is UnparsedFrame) return '$frame\n';
 
-      final location = mappedLocations[i].padRight(longest);
-      final frameStr = '$location   ${frame.member}\n';
-      return frame.isCore ? _coreLibraryStyle.wrap(frameStr) : frameStr;
+      final loc = mappedLocations[i].padRight(longest);
+      final num = includeFrameNumbers ? '#$i'.padRight(_numColumnWidth) : '';
+      final line = '$num$loc   ${frame.member}\n';
+
+      return frame.isCore ? _coreLibraryStyle.wrap(line) : line;
     }).join();
   }
 
