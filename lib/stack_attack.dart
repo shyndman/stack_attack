@@ -13,17 +13,20 @@ class StackTraceFormatter {
   StackTraceFormatter._(
     this._pkgNameToFileMap, {
     required this.useRelativePathsIfShorter,
-    required this.includeFrameNumbers,
+    required this.showFrameNumbers,
+    required this.invertFrameNumbers,
   });
 
   final Map<String, Uri> _pkgNameToFileMap;
   final bool useRelativePathsIfShorter;
-  final bool includeFrameNumbers;
+  final bool showFrameNumbers;
+  final bool invertFrameNumbers;
 
   static Future<StackTraceFormatter> create({
     Iterable<String> packageNamesToResolve = const [],
     bool useRelativePathsIfShorter = true,
-    bool includeFrameNumbers = false,
+    bool showFrameNumbers = false,
+    bool invertFrameNumbers = false,
   }) async {
     final entries = await Future.wait(
       packageNamesToResolve.map((pkgName) async {
@@ -42,7 +45,8 @@ class StackTraceFormatter {
     return StackTraceFormatter._(
       Map.fromEntries(entries),
       useRelativePathsIfShorter: useRelativePathsIfShorter,
-      includeFrameNumbers: includeFrameNumbers,
+      showFrameNumbers: showFrameNumbers,
+      invertFrameNumbers: invertFrameNumbers,
     );
   }
 
@@ -66,11 +70,18 @@ class StackTraceFormatter {
       if (frame is UnparsedFrame) return '$frame\n';
 
       final loc = mappedLocations[i].padRight(longest);
-      final num = includeFrameNumbers ? '#$i'.padRight(_numColumnWidth) : '';
+      final num = _formatFrameNumber(i, frames.length);
       final line = '$num$loc   ${frame.member}\n';
 
       return frame.isCore ? _coreLibraryStyle.wrap(line) : line;
     }).join();
+  }
+
+  String _formatFrameNumber(int frameNumber, int frameCount) {
+    if (!showFrameNumbers) return '';
+
+    final num = invertFrameNumbers ? frameCount - frameNumber : frameNumber;
+    return '#$num'.padRight(_numColumnWidth);
   }
 
   List<String> _mapTraceLocations(Trace trace) {
@@ -81,7 +92,9 @@ class StackTraceFormatter {
             f.library.substring(f.library.indexOf('/') + 1);
 
         final absFilePath = '$pkgLibRootPath$relativeFilePath';
-        final filePath = useRelativePathsIfShorter ? _findShortestPath(absFilePath) : absFilePath;
+        final filePath = useRelativePathsIfShorter
+            ? _findShortestPath(absFilePath)
+            : absFilePath;
 
         return '$filePath:${f.line}:${f.column}';
       } else {

@@ -6,7 +6,7 @@ void main() {
   group('StackTraceFormatter', () {
     test('', () async {
       final formatter = await StackTraceFormatter.create(
-        includeFrameNumbers: true,
+        showFrameNumbers: true,
       );
       print(formatter.formatParsed(Trace.parse(stackTrace)));
     });
