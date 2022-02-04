@@ -80,7 +80,7 @@ class StackTraceFormatter {
   String _formatFrameNumber(int frameNumber, int frameCount) {
     if (!showFrameNumbers) return '';
 
-    final num = invertFrameNumbers ? frameCount - frameNumber : frameNumber;
+    final num = invertFrameNumbers ? frameCount - frameNumber - 1 : frameNumber;
     return '#$num'.padRight(_numColumnWidth);
   }
 

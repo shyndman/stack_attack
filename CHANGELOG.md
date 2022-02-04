@@ -1,3 +1,7 @@
+## 0.0.0-pre.4
+
+- Make inverted frame numbers zero based
+
 ## 0.0.0-pre.3
 
 - Add flag to invert stack frame numbers in output
