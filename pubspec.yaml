@@ -7,9 +7,9 @@ environment:
   sdk: '>=2.15.1 <3.0.0'
 
 dependencies:
-  io: ^1.0.3
-  path: ^1.8.1
-  quiver: ^3.0.1+1
+  io: ^1.0.0
+  path: ^1.8.0
+  quiver: ^3.0.0
   stack_trace: ^1.10.0
 
 dev_dependencies:
