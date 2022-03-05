@@ -1,3 +1,7 @@
+## 0.0.0
+
+- Useful enough, so it's getting a release build
+
 ## 0.0.0-pre.4
 
 - Make inverted frame numbers zero based
