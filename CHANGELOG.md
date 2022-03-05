@@ -1,3 +1,7 @@
+## 0.0.1
+
+- Loosen dependency versions
+
 ## 0.0.0
 
 - Useful enough, so it's getting a release build
