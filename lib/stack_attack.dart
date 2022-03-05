@@ -22,8 +22,12 @@ class StackTraceFormatter {
   final bool showFrameNumbers;
   final bool invertFrameNumbers;
 
+  /// NOTE:
+  /// [packageNamesToResolve] will not work in Flutter environments. Use
+  /// [packageNamesToPaths] instead.
   static Future<StackTraceFormatter> create({
     Iterable<String> packageNamesToResolve = const [],
+    Map<String, String> packageNamesToPaths = const {},
     bool useRelativePathsIfShorter = true,
     bool showFrameNumbers = false,
     bool invertFrameNumbers = false,
@@ -42,8 +46,12 @@ class StackTraceFormatter {
       }),
       eagerError: true,
     );
+    final packageNameToPathMap = {
+      ...Map.fromEntries(entries),
+      ...packageNamesToPaths.map((key, value) => MapEntry(key, Uri.parse(value))),
+    };
     return StackTraceFormatter._(
-      Map.fromEntries(entries),
+      packageNameToPathMap,
       useRelativePathsIfShorter: useRelativePathsIfShorter,
       showFrameNumbers: showFrameNumbers,
       invertFrameNumbers: invertFrameNumbers,
