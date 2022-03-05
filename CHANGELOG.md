@@ -1,3 +1,7 @@
+## 0.1.0
+
+- Add the ability to map package names to paths via a map argument
+
 ## 0.0.1
 
 - Loosen dependency versions
